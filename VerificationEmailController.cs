@@ -17,17 +17,16 @@ namespace maratonMszana_v4.Controllers
 {
     public class VerificationEmailController : Controller
     {
-        private readonly IDataVerification _idata;
+        
         private readonly IUniqueException _ithrow;
         private readonly ISendingVerifyingEmail _isendingVer;
         private readonly ISendingConfirmationRegistrationEmail _isendingEnd;
         private readonly ICheckWerification _icheck;
 
 
-        public VerificationEmailController( IDataVerification _idata,ISendingVerifyingEmail isendingE, IUniqueException _ithrow, 
+        public VerificationEmailController( ISendingVerifyingEmail isendingE, IUniqueException _ithrow, 
             ISendingConfirmationRegistrationEmail _isending, ICheckWerification _icheck)
         {
-            this._idata = _idata;
             this._ithrow = _ithrow;
             this._isendingVer = isendingE;
             this._isendingEnd = _isending;
@@ -37,7 +36,7 @@ namespace maratonMszana_v4.Controllers
         [HttpGet]
         public ActionResult VerificationNumber()
         {
-
+            int randomNumber = -1;
             kartoteka2 kartoteka = new kartoteka2();
             if (Session["kartoteka"] != null)
             {
@@ -47,10 +46,10 @@ namespace maratonMszana_v4.Controllers
             {
                 return RedirectToAction("Register","Registration");
             }
-
-            if (_idata.emailVerfication(kartoteka.kart_email))
+            randomNumber = _isendingVer.sendEmailToVerification(kartoteka.kart_email, kartoteka.kart_nazwisko, kartoteka.kart_imie);
+            if (randomNumber > 0)
             {
-                Session["randomValue"] = _isendingVer.sendEmailToVerification(kartoteka.kart_email, kartoteka.kart_nazwisko, kartoteka.kart_email);
+                Session["randomValue"] = randomNumber;
                 ViewBag.imie = kartoteka.kart_imie;
                 ViewBag.nazwisko = kartoteka.kart_nazwisko;
                 ViewBag.email = kartoteka.kart_email;
@@ -72,8 +71,7 @@ namespace maratonMszana_v4.Controllers
              
                 if ((_randomNumber > 0) && (_number == _randomNumber))
                 {
-                    var werification = _icheck.getTimeWerification(_kart.kart_imie, _kart.kart_nazwisko, _kart.kart_email);
-                    if (_icheck.verification(werification.dataRej, DateTime.Now))
+                    if (_icheck.getTimeAndVerification(_kart.kart_imie, _kart.kart_nazwisko, _kart.kart_email))
                     {
                         ViewBag.visibleTrue = true;
                         using (var db = new EntitiesMaraton())

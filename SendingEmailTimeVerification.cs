@@ -28,5 +28,7 @@ namespace SendMail.SendEmailVerification
                 dataRej = DateTime.Now
             });
         }
+
+        
     }
 }
