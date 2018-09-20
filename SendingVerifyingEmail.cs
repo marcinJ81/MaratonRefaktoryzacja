@@ -12,29 +12,19 @@ namespace SendMail.SendEmailVerification
     {
         private readonly IRandomNumber _irandom;
         private readonly IDescriptionVerificationNumber _idesc;
-        private readonly ISMTP_Configuration _ismtp;
-        private readonly ICheckWerification _icheck;
+        private readonly ISendingEmailTimeVerification _isending;
 
-        public SendingVerifyingEmail(IRandomNumber _irandom, IDescriptionVerificationNumber _desc, ISMTP_Configuration _ismtp, ICheckWerification _icheck)
+        public SendingVerifyingEmail(IRandomNumber _irandom, IDescriptionVerificationNumber _desc, ISendingEmailTimeVerification _isending)
         {
             this._irandom = _irandom;
             this._idesc = _desc;
-            this._ismtp = _ismtp;
-            this._icheck = _icheck;
+            this._isending = _isending;
         }
         public int sendEmailToVerification(string email, string nazwisko, string imie)
         {
             int _random = _irandom.generateNumber();
-
             var _mail = _idesc.create_description(imie,nazwisko, email, _random);
-            _ismtp.sendEmail(_mail);
-            _icheck.saveTimeWerification(new kartoteka_TMP
-            {
-                imie = imie,
-                nazwisko = nazwisko,
-                email = email,
-                dataRej = DateTime.Now
-            });
+            _isending.sendEmailInsertTimeVerification(_mail, imie, nazwisko, email);
             return  _random;
         }
     }
